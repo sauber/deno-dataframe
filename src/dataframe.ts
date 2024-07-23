@@ -258,6 +258,12 @@ export class DataFrame {
     return this.names.map((x) => this.columns[x].values[index]);
   }
 
+  /** Values from a series */
+  public values<T>(name: string): Array<T> {
+    const all = this.columns[name].values as Array<T>;
+    return this.index.map((i: number) => all[i]);
+  }
+
   /** Export data to matrix */
   public get grid(): Array<RowValues> {
     return this.index.map((i: number) => this.line(i));
