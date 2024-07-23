@@ -1,2 +1,2 @@
-# deno-dataset
+# deno-dataframe
 A frame of columnar data
