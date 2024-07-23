@@ -137,11 +137,6 @@ export class Series extends DataSeries<number | undefined>
 
   /** Calculate sum of numbers in series */
   public get sum(): number {
-    // const arr = this.values;
-    // let sum = 0;
-    // let i = arr.length;
-    // while (i--) sum += arr[i];
-    // return sum;
     return this.values.reduce(
       (sum: number, a) => sum + (a !== undefined ? a : 0),
       0,

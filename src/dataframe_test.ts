@@ -28,7 +28,6 @@ Deno.test("Print as Table", { ignore: true }, () => {
 Deno.test("Grid", () => {
   const df = DataFrame.fromRecords(testdata);
   const g: SeriesTypes[][] = df.grid;
-  //console.log(g);
   assertEquals(g[0][0], 1);
 });
 
@@ -65,7 +64,6 @@ Deno.test("Correlation Matrix", () => {
 
   const c = i.correlationMatrix(o);
   assertEquals(c.column("Keys").values, ["i1", "i2", "i3"]);
-  //c.digits(2).print("Pearson Correlation Coefficients Matrix");
 });
 
 Deno.test("Sorting", () => {
