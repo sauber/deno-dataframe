@@ -20,26 +20,32 @@ export type SeriesClasses =
   | BoolSeries
   | ObjectSeries<object>;
 
+/** Abstract series */
 abstract class DataSeries<T> implements SeriesInterface<T> {
   constructor(public readonly values: Array<T> = []) {}
 
+  /** Count of elements in series */
   public get length(): number {
     return this.values.length;
   }
 
+  /** First elements in series */
   public get first(): T {
     return this.values[0];
   }
 
+  /** Last elements in series */
   public get last(): T {
     return this.values[this.values.length - 1];
   }
 
+  /** Random elements in series */
   public get any(): T {
     const index: number = Math.floor(this.values.length * Math.random());
     return this.values[index];
   }
 
+  /** Verify series of numbers */
   public get isNumber(): boolean {
     return typeof this.first === "number";
   }
@@ -74,7 +80,7 @@ export class ObjectSeries<T> extends DataSeries<T>
   }
 }
 
-/** Series of numbers */
+/** Series of numbers (or undefined values) */
 export class Series extends DataSeries<number | undefined>
   implements SeriesInterface<number | undefined> {
   constructor(values?: Array<number | undefined>) {

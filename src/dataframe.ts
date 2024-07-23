@@ -32,7 +32,6 @@ function series(array: Array<unknown>): SeriesClasses | undefined {
 /** A collection of series with same length */
 export class DataFrame {
   private readonly index: Index;
-  //public readonly length: number;
 
   constructor(
     // Data Series
