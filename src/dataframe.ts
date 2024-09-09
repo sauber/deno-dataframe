@@ -222,9 +222,9 @@ export class DataFrame {
     return new DataFrame(columns, this.index);
   }
 
-  /** Scale values in column to sum of 1 
+  /** Scale values in column to sum of 1
    * TODO: Only apply to rows in index
-  */
+   */
   public distribute(name: string): DataFrame {
     return this.replace(name, (this.column(name) as Series).distribute);
   }
@@ -243,9 +243,9 @@ export class DataFrame {
     return this.replace(name, (this.column(name) as Series).scale(factor));
   }
 
-  /** Add operand to values in column 
+  /** Add operand to values in column
    * TODO: Only apply to rows in index
-  */
+   */
   public add(name: string, operand: number): DataFrame {
     return this.replace(name, (this.column(name) as Series).add(operand));
   }
