@@ -15,7 +15,7 @@ type ColumnName = string;
 type ColumnTypeName = "number" | "string" | "bool" | "object";
 type Header = Record<ColumnName, ColumnTypeName>;
 
-/** Generate a series from an array of unknown values */
+/** Auto-generate a series from an array of unknown values */
 function series(array: Array<unknown>): SeriesClasses | undefined {
   switch (typeof array[0]) {
     case "number":
@@ -37,7 +37,7 @@ export class DataFrame {
     // Data Series
     private readonly columns: Columns = {},
     // Ordering of rows
-    index?: Index,
+    index?: Index
   ) {
     // Names of columns
     const names: ColumnNames = Object.keys(columns);
@@ -65,36 +65,34 @@ export class DataFrame {
         {},
         ...Object.keys(records[0]).map((name: string) => {
           const array = records.map(
-            (rec: Record<string, unknown>) => rec[name],
+            (rec: Record<string, unknown>) => rec[name]
           );
           const ser = series(array);
           if (ser) return { [name]: ser };
-        }),
-      ),
+        })
+      )
     );
   }
 
   /** Generate a DataFrame from a header definition and optional data.  */
   public static fromDef(header: Header, records: RowRecords = []): DataFrame {
     const columns: Columns = Object.fromEntries(
-      Object.entries(header).map(
-        ([name, type]) => {
-          const values = records.map((r) => r[name]);
-          const series = function () {
-            switch (type) {
-              case "number":
-                return new Series(values as number[]);
-              case "string":
-                return new TextSeries(values as string[]);
-              case "bool":
-                return new BoolSeries(values as boolean[]);
-              default:
-                return new ObjectSeries<object>(values as object[]);
-            }
-          };
-          return [name, series()];
-        },
-      ),
+      Object.entries(header).map(([name, type]) => {
+        const values = records.map((r) => r[name]);
+        const series = function () {
+          switch (type) {
+            case "number":
+              return new Series(values as number[]);
+            case "string":
+              return new TextSeries(values as string[]);
+            case "bool":
+              return new BoolSeries(values as boolean[]);
+            default:
+              return new ObjectSeries<object>(values as object[]);
+          }
+        };
+        return [name, series()];
+      })
     );
     return new DataFrame(columns);
   }
@@ -103,7 +101,7 @@ export class DataFrame {
   public include(names: ColumnNames): DataFrame {
     return new DataFrame(
       Object.assign({}, ...names.map((x) => ({ [x]: this.column(x) }))),
-      this.index,
+      this.index
     );
   }
 
@@ -113,7 +111,9 @@ export class DataFrame {
     return this.include(keep);
   }
 
-  /** Correlation of each series to each series on other dataframe */
+  /** Correlation of each series to each series on other dataframe
+   * TODO: Only apply to rows in index
+   */
   public correlationMatrix(other: DataFrame): DataFrame {
     const RowRecords = this.names;
     const cols = other.names;
@@ -134,7 +134,9 @@ export class DataFrame {
     return new DataFrame(columns);
   }
 
-  /** Reduce count of significant digits */
+  /** Reduce count of significant digits
+   * TODO: Only apply to rows in index
+   */
   public digits(units: number, names: string[] = this.names): DataFrame {
     const columns: Columns = {};
     names.forEach((name) => {
@@ -169,16 +171,16 @@ export class DataFrame {
     } else return this;
   }
 
-  /** Select only matching rows */
-  public select(callback: RowCallback): DataFrame {
-    return this.reindex(
-      this.index.filter((index: number) => callback(this.record(index))),
-    );
-  }
-
   /** Rearrange rows */
   private reindex(index: Index): DataFrame {
     return new DataFrame(this.columns, index);
+  }
+
+  /** Select only matching rows */
+  public select(callback: RowCallback): DataFrame {
+    return this.reindex(
+      this.index.filter((index: number) => callback(this.record(index)))
+    );
   }
 
   /** Rows in reverse order */
@@ -207,7 +209,7 @@ export class DataFrame {
   public rename(names: Record<string, string>): DataFrame {
     const columns: Columns = {};
     Object.entries(this.columns).forEach(([from, column]) => {
-      const to: string = (from in names) ? names[from] : from;
+      const to: string = from in names ? names[from] : from;
       columns[to] = column;
     });
     return new DataFrame(columns, this.index);
@@ -220,22 +222,30 @@ export class DataFrame {
     return new DataFrame(columns, this.index);
   }
 
-  /** Scale values in column to sum of 1 */
+  /** Scale values in column to sum of 1 
+   * TODO: Only apply to rows in index
+  */
   public distribute(name: string): DataFrame {
     return this.replace(name, (this.column(name) as Series).distribute);
   }
 
-  /** Take log of each value in column */
+  /** Take log of each value in column
+   * TODO: Only apply to rows in index
+   */
   public log(name: string): DataFrame {
     return this.replace(name, (this.column(name) as Series).log);
   }
 
-  /** Scale values in column by factor */
+  /** Scale values in column by factor
+   * TODO: Only apply to rows in index
+   */
   public scale(name: string, factor: number): DataFrame {
     return this.replace(name, (this.column(name) as Series).scale(factor));
   }
 
-  /** Add operand to values in column */
+  /** Add operand to values in column 
+   * TODO: Only apply to rows in index
+  */
   public add(name: string, operand: number): DataFrame {
     return this.replace(name, (this.column(name) as Series).add(operand));
   }
@@ -244,7 +254,7 @@ export class DataFrame {
   private record(index: number): RowRecord {
     return Object.assign(
       {},
-      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] })),
+      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] }))
     );
   }
 
