@@ -4,8 +4,13 @@ import type { SeriesClasses, SeriesTypes } from "./series.ts";
 
 type Column = Series | TextSeries | BoolSeries | ObjectSeries<object>;
 type Columns = Record<string, Column>;
+
+/** A single record of values spanning columns */
 export type RowRecord = Record<string, SeriesTypes>;
+
+/** All columns converted to list of records */
 export type RowRecords = Array<RowRecord>;
+
 type RowValues = Array<SeriesTypes>;
 type Index = number[];
 type ColumnNames = string[];

@@ -1,6 +1,6 @@
 {
   "name": "@sauber/dataframe",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "exports": "./mod.ts",
   "imports": {
     "@sauber/table": "jsr:@sauber/table@^0.1.0",

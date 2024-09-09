@@ -13,7 +13,10 @@ export interface SeriesInterface<T> {
   any: T;
 }
 
+/** Native types allowed in series. A series can be of only one type. */
 export type SeriesTypes = number | string | boolean | object | undefined;
+
+/** Series classes available */
 export type SeriesClasses =
   | Series
   | TextSeries
