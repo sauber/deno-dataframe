@@ -1,7 +1,8 @@
 # deno-dataframe
 
-Data is stored in columns. Most operations only apply to the index and no changes are made to original columns.
-When exported only modified data will be included.
+Data is stored in columns. Most operations only apply to the index and no
+changes are made to original columns. When exported only modified data will be
+included.
 
 ## Examples
 
