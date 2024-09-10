@@ -111,11 +111,6 @@ export class Series
     return this.derive((n) => n * n);
   }
 
-  /** Convert to absolute numbers */
-  public get abs(): Series {
-    return this.derive((n) => Math.abs(n));
-  }
-
   /** Multiply each items in this series with item at other series: n[i] = x[i] * y[i] */
   public dot(other: Series): Series {
     const values = [];

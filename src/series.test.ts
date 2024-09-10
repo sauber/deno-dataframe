@@ -45,8 +45,3 @@ Deno.test("Correlation", () => {
     assertEquals(s.correlation(o), t[2]);
   }
 });
-
-Deno.test("Positive Numbers", () => {
-  const s = new Series([-1, 1]);
-  assertEquals(s.abs.values, [1, 1]);
-});

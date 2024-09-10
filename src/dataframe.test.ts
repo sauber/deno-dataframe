@@ -1,10 +1,15 @@
-import { assertEquals, assertInstanceOf } from "@std/assert";
+import {
+  assertEquals,
+  assertGreaterOrEqual,
+  assertInstanceOf,
+  assertLessOrEqual,
+} from "@std/assert";
 import { DataFrame } from "./dataframe.ts";
 import type { SeriesTypes } from "./series.ts";
 
 const testdata = [
-  { n: 1, s: "a", b: true, o: {l: "foo"} },
-  { n: 3, s: "b", b: false, o: {l: "bar"} },
+  { n: 1, s: "a", b: true, o: { l: "foo" } },
+  { n: 3, s: "b", b: false, o: { l: "bar" } },
 ];
 
 Deno.test("Empty initialization", () => {
@@ -20,9 +25,12 @@ Deno.test("Import and export records", () => {
 });
 
 Deno.test("Explicit define headers", () => {
-  const df = DataFrame.fromDef({n: "number", s: "string", b: "bool", o: "object"}, testdata);
+  const df = DataFrame.fromDef(
+    { n: "number", s: "string", b: "bool", o: "object" },
+    testdata
+  );
   assertEquals(df.names, ["n", "s", "b", "o"]);
-})
+});
 
 Deno.test("Print as Table", { ignore: true }, () => {
   const df = DataFrame.fromRecords(testdata);
@@ -55,20 +63,34 @@ Deno.test("Correlation Matrix", () => {
     return Math.round(10 * Math.random());
   }
 
+  // Input records
   const i = DataFrame.fromRecords([
     { i1: r(), i2: r(), i3: r() },
     { i1: r(), i2: r(), i3: r() },
     { i1: r(), i2: r(), i3: r() },
   ]);
 
+  // Output records
   const o = DataFrame.fromRecords([
     { o1: r(), o2: r() },
     { o1: r(), o2: r() },
     { o1: r(), o2: r() },
   ]);
 
-  const c = i.correlationMatrix(o);
+  // Correlated input to output
+  const c: DataFrame = i.correlationMatrix(o);
+
+  // Confirm row and column names
   assertEquals(c.column("Keys").values, ["i1", "i2", "i3"]);
+  assertEquals(c.names, ["Keys", "o1", "o2"]);
+
+  // Confirm output in range -1 to +1
+  ["o1", "o2"].forEach((name) =>
+    c.values<number>(name).forEach((v) => {
+      assertGreaterOrEqual(v, -1);
+      assertLessOrEqual(v, 1);
+    })
+  );
 });
 
 Deno.test("Sorting", () => {
@@ -116,7 +138,7 @@ Deno.test("Rename Columns", () => {
 
 Deno.test("Combine DataFrames", () => {
   const df = DataFrame.fromRecords(testdata);
-  const dg = DataFrame.fromRecords([{o:4}, {o:5}])
+  const dg = DataFrame.fromRecords([{ o: 4 }, { o: 5 }]);
   const dc = df.join(dg);
   assertEquals(dc.values<number>("n"), [1, 3]);
   assertEquals(dc.values<number>("o"), [4, 5]);
@@ -130,7 +152,7 @@ Deno.test("Distribution", () => {
 
 Deno.test("Digits", () => {
   const df = DataFrame.fromRecords(testdata);
-  const dn = df.scale("n", 1/7).digits(2);
+  const dn = df.scale("n", 1 / 7).digits(2);
   assertEquals(dn.values<number>("n"), [0.14, 0.43]);
 });
 
