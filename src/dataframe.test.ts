@@ -3,8 +3,8 @@ import { DataFrame } from "./dataframe.ts";
 import type { SeriesTypes } from "./series.ts";
 
 const testdata = [
-  { n: 1, s: "a", b: true },
-  { n: 2, s: "b", b: false },
+  { n: 1, s: "a", b: true, o: {l: "foo"} },
+  { n: 3, s: "b", b: false, o: {l: "bar"} },
 ];
 
 Deno.test("Empty initialization", () => {
@@ -18,6 +18,11 @@ Deno.test("Import and export records", () => {
   const e = df.records;
   assertEquals(testdata, e);
 });
+
+Deno.test("Explicit define headers", () => {
+  const df = DataFrame.fromDef({n: "number", s: "string", b: "bool", o: "object"}, testdata);
+  assertEquals(df.names, ["n", "s", "b", "o"]);
+})
 
 Deno.test("Print as Table", { ignore: true }, () => {
   const df = DataFrame.fromRecords(testdata);
@@ -42,7 +47,7 @@ Deno.test("Exclude columns", () => {
   const df = DataFrame.fromRecords(testdata);
   const cols = ["s", "n"];
   const sel = df.exclude(cols);
-  assertEquals(sel.names, ["b"]);
+  assertEquals(sel.names, ["b", "o"]);
 });
 
 Deno.test("Correlation Matrix", () => {
@@ -76,13 +81,19 @@ Deno.test("Sorting", () => {
 Deno.test("Generate Column", () => {
   const df = DataFrame.fromRecords(testdata);
   const amend = df.amend("neg", (r) => (r.n !== undefined ? -r.n : undefined));
-  assertEquals(amend.column("neg").values, [-1, -2]);
+  assertEquals(amend.column("neg").values, [-1, -3]);
 });
 
 Deno.test("Reverse Rows", () => {
   const df = DataFrame.fromRecords(testdata);
   const rev = df.reverse;
-  assertEquals(rev.column("n").values, [1, 2]);
+  assertEquals(rev.column("n").values, [1, 3]);
+});
+
+Deno.test("Shuffle Rows", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const ran = df.shuffle;
+  assertEquals(ran.length, 2);
 });
 
 Deno.test("Reduce Rows", () => {
@@ -100,5 +111,37 @@ Deno.test("Filter Rows", () => {
 Deno.test("Rename Columns", () => {
   const df = DataFrame.fromRecords(testdata);
   const mv = df.rename({ s: "t", b: "c" });
-  assertEquals(mv.names, ["n", "t", "c"]);
+  assertEquals(mv.names, ["n", "t", "c", "o"]);
+});
+
+Deno.test("Combine DataFrames", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const dg = DataFrame.fromRecords([{o:4}, {o:5}])
+  const dc = df.join(dg);
+  assertEquals(dc.values<number>("n"), [1, 3]);
+  assertEquals(dc.values<number>("o"), [4, 5]);
+});
+
+Deno.test("Distribution", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const ds = df.distribute("n");
+  assertEquals(ds.values<number>("n"), [0.25, 0.75]);
+});
+
+Deno.test("Digits", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const dn = df.scale("n", 1/7).digits(2);
+  assertEquals(dn.values<number>("n"), [0.14, 0.43]);
+});
+
+Deno.test("Log", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const dl = df.log("n").digits(3);
+  assertEquals(dl.values<number>("n"), [0, 1.099]);
+});
+
+Deno.test("Addition", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const dl = df.add("n", 1);
+  assertEquals(dl.values<number>("n"), [2, 4]);
 });
