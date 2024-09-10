@@ -1,7 +1,6 @@
 import { Table } from "@sauber/table";
 import { BoolSeries, ObjectSeries, Series, TextSeries } from "./series.ts";
 import type { SeriesClasses, SeriesTypes } from "./series.ts";
-import { magenta } from "jsr:@std/fmt@^0.224.0/colors";
 
 type Column = Series | TextSeries | BoolSeries | ObjectSeries<object>;
 type Columns = Record<string, Column>;
@@ -22,7 +21,7 @@ type ColumnTypeName = "number" | "string" | "bool" | "object";
 type Header = Record<ColumnName, ColumnTypeName>;
 
 /** Auto-generate a series from an array of unknown values */
-function series(array: Array<unknown>): SeriesClasses | undefined {
+function series(array: Array<unknown>): SeriesClasses {
   switch (typeof array[0]) {
     case "number":
       return new Series(array as number[]);
@@ -51,15 +50,12 @@ export class DataFrame {
     // Index
     if (index) {
       this.index = index;
-      //this.length = index.length;
     } else {
       if (names.length) {
         const first = columns[names[0]];
-        //this.length = first.length;
         this.index = Array.from(Array(first.length).keys());
       } else {
         this.index = [];
-        //this.length = 0;
       }
     }
   }
@@ -140,15 +136,24 @@ export class DataFrame {
     return new DataFrame(columns);
   }
 
-  /** Reduce count of significant digits
-   * TODO: Only apply to rows in index
-   */
+  /** Generate new number series based existing named series */
+  private generate(name: string, callback: (n: number) => number): Series {
+    const current = this.columns[name].values as Array<number>;
+    const values = this.index.map((i) =>
+      current[i] === undefined ? undefined : callback(current[i])
+    );
+    const series = new Series(values);
+    return series;
+  }
+
+  /** Reduce count of significant digits */
   public digits(units: number, names: string[] = this.names): DataFrame {
     const columns: Columns = {};
     names.forEach((name) => {
       const column: Column = this.column(name);
+      // Only change columns with numbers
       columns[name] = column.isNumber
-        ? (column as Series).digits(units)
+        ? this.generate(name, (n) => parseFloat(n.toFixed(units)))
         : column;
     });
     return new DataFrame(columns, this.index);
@@ -172,9 +177,7 @@ export class DataFrame {
       .map((index) => this.record(index))
       .map((row: RowRecord) => callback(row));
     const ser = series(array);
-    if (ser) {
-      return new DataFrame(Object.assign({}, this.columns, { [name]: ser }));
-    } else return this;
+    return new DataFrame(Object.assign({}, this.columns, { [name]: ser }));
   }
 
   /** Rearrange order of rows */
@@ -194,9 +197,7 @@ export class DataFrame {
     return this.reindex(this.index.reverse());
   }
 
-  /** Slice each column
-   * Note: Underlying series are not sliced
-   */
+  /** Slice each column */
   public slice(start: number, end: number): DataFrame {
     return this.reindex(this.index.slice(start, end));
   }
@@ -221,39 +222,38 @@ export class DataFrame {
     return new DataFrame(columns, this.index);
   }
 
-  /** Replace existing column with new  */
+  /** Replace existing column with new */
   private replace(name: string, column: Column): DataFrame {
     const columns: Columns = { ...this.columns };
     columns[name] = column;
     return new DataFrame(columns, this.index);
   }
 
-  /** Scale values in column to sum of 1
-   * TODO: Only apply to rows in index
-   */
+  /** Generate new numeric series where each value is derived from existing series */
+  private derive(name: string, callback: (n: number) => number): DataFrame {
+    return this.replace(name, this.generate(name, callback));
+  }
+
+  /** Scale values in column to sum of 1 */
   public distribute(name: string): DataFrame {
-    return this.replace(name, (this.column(name) as Series).distribute);
+    const numbers = this.values<number>(name).filter((n) => isFinite(n));
+    const sum = numbers.reduce((s, a) => s + a, 0);
+    return this.derive(name, (n) => n / sum);
   }
 
   /** Take log of each value in column */
   public log(name: string): DataFrame {
-    const prev = this.columns[name].values as Array<number>;
-    const log = new Series(this.index.map((i) => Math.log(prev[i])));
-    return this.replace(name, log);
+    return this.derive(name, (n) => Math.log(n));
   }
 
-  /** Scale values in column by factor
-   * TODO: Only apply to rows in index
-   */
+  /** Scale values in column by factor */
   public scale(name: string, factor: number): DataFrame {
-    return this.replace(name, (this.column(name) as Series).scale(factor));
+    return this.derive(name, (n) => n * factor);
   }
 
-  /** Add operand to values in column
-   * TODO: Only apply to rows in index
-   */
+  /** Add operand to values in column */
   public add(name: string, operand: number): DataFrame {
-    return this.replace(name, (this.column(name) as Series).add(operand));
+    return this.derive(name, (n) => n + operand);
   }
 
   /** Values and columns names from all series at index */
