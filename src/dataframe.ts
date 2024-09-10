@@ -1,6 +1,7 @@
 import { Table } from "@sauber/table";
 import { BoolSeries, ObjectSeries, Series, TextSeries } from "./series.ts";
 import type { SeriesClasses, SeriesTypes } from "./series.ts";
+import { magenta } from "jsr:@std/fmt@^0.224.0/colors";
 
 type Column = Series | TextSeries | BoolSeries | ObjectSeries<object>;
 type Columns = Record<string, Column>;
@@ -176,7 +177,7 @@ export class DataFrame {
     } else return this;
   }
 
-  /** Rearrange rows */
+  /** Rearrange order of rows */
   private reindex(index: Index): DataFrame {
     return new DataFrame(this.columns, index);
   }
@@ -234,11 +235,11 @@ export class DataFrame {
     return this.replace(name, (this.column(name) as Series).distribute);
   }
 
-  /** Take log of each value in column
-   * TODO: Only apply to rows in index
-   */
+  /** Take log of each value in column */
   public log(name: string): DataFrame {
-    return this.replace(name, (this.column(name) as Series).log);
+    const prev = this.columns[name].values as Array<number>;
+    const log = new Series(this.index.map((i) => Math.log(prev[i])));
+    return this.replace(name, log);
   }
 
   /** Scale values in column by factor

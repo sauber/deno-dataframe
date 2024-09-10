@@ -102,11 +102,6 @@ export class Series extends DataSeries<number | undefined>
     return this.derive((n) => n * n);
   }
 
-  /** Generate new Series: n => log(n) */
-  public get log(): Series {
-    return this.derive((n) => Math.log(n));
-  }
-
   /** Generate new Series: n => n + b */
   public add(operand: number): Series {
     return this.derive((n) => n + operand);
