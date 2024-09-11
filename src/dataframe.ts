@@ -1,3 +1,4 @@
+import { correlation } from "@sauber/correlation";
 import { Table } from "@sauber/table";
 import { BoolSeries, ObjectSeries, Series, TextSeries } from "./series.ts";
 import type { SeriesClasses, SeriesTypes } from "./series.ts";
@@ -127,7 +128,10 @@ export class DataFrame {
       for (const RowRecordname of RowRecords) {
         const sc = other.column(colname) as Series;
         const sr = this.column(RowRecordname) as Series;
-        const coef: number = sr.correlation(sc);
+        const coef: number = correlation(
+          sc.values as number[],
+          sr.values as number[]
+        );
         results.push(coef);
       }
       columns[colname] = new Series(results);

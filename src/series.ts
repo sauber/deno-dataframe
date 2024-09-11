@@ -62,11 +62,6 @@ export class TextSeries
   constructor(values?: Array<string>) {
     super(values);
   }
-
-  /** Sort alphabetically */
-  // public get sort(): TextSeries {
-  //   return new TextSeries(this.values.sort(Intl.Collator().compare));
-  // }
 }
 
 /** Series of booleans */
@@ -97,48 +92,5 @@ export class Series
   public readonly isNumber: boolean = true;
   constructor(values?: Array<number | undefined>) {
     super(values);
-  }
-
-  /** Modify each valid number in series */
-  private derive(callback: (n: number) => number): Series {
-    return new Series(
-      this.values.map((n) => (n !== undefined ? callback(n) : undefined))
-    );
-  }
-
-  /** Generate new Series: n => n*n */
-  public get pow2(): Series {
-    return this.derive((n) => n * n);
-  }
-
-  /** Multiply each items in this series with item at other series: n[i] = x[i] * y[i] */
-  public dot(other: Series): Series {
-    const values = [];
-    for (let i = 0; i < this.values.length; i++) {
-      const [x, y] = [this.values[i], other.values[i]];
-      values.push(x !== undefined && y !== undefined ? x * y : undefined);
-    }
-    return new Series(values);
-  }
-
-  /** Calculate sum of numbers in series */
-  public get sum(): number {
-    return this.values.reduce(
-      (sum: number, a) => sum + (a !== undefined ? a : 0),
-      0
-    );
-  }
-
-  /** Calculate Pearson Correlation Coefficient to other series */
-  public correlation(other: Series): number {
-    const n: number = this.values.length;
-    const x: number = this.sum;
-    const y: number = other.sum;
-    const x2: number = this.pow2.sum;
-    const y2: number = other.pow2.sum;
-    const xy: number = this.dot(other).sum;
-    const r: number =
-      (n * xy - x * y) / Math.sqrt((n * x2 - x * x) * (n * y2 - y * y));
-    return r;
   }
 }

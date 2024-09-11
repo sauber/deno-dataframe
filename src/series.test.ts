@@ -31,17 +31,3 @@ Deno.test("Any item", () => {
   const s = new Series([10]);
   assertEquals(s.any, 10);
 });
-
-Deno.test("Correlation", () => {
-  const tests: Array<[Array<number>, Array<number>, number]> = [
-    [[1, 2, 3], [1, 2, 3], 1],
-    [[1, 2, 3], [3, 2, 1], -1],
-    [[1, 2, 3], [1, 3, 2], 0.5],
-    [[1, 2, 3], [3, 1, 2], -0.5],
-  ];
-  for (const t of tests) {
-    const s = new Series(t[0]);
-    const o = new Series(t[1]);
-    assertEquals(s.correlation(o), t[2]);
-  }
-});
