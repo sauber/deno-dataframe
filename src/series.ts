@@ -89,7 +89,7 @@ export class Series
   extends DataSeries<number | undefined>
   implements SeriesInterface<number | undefined>
 {
-  public readonly isNumber: boolean = true;
+  override readonly isNumber: boolean = true;
   constructor(values?: Array<number | undefined>) {
     super(values);
   }
