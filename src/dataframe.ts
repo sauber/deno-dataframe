@@ -1,4 +1,4 @@
-import { correlation } from "@sauber/correlation";
+import { correlation } from "@sauber/statistics";
 import { Table } from "@sauber/table";
 import { BoolSeries, ObjectSeries, Series, TextSeries } from "./series.ts";
 import type { SeriesClasses, SeriesTypes } from "./series.ts";
