@@ -43,7 +43,7 @@ export class DataFrame {
     // Data Series
     private readonly columns: Columns = {},
     // Ordering of rows
-    index?: Index
+    index?: Index,
   ) {
     // Names of columns
     const names: ColumnNames = Object.keys(columns);
@@ -68,12 +68,12 @@ export class DataFrame {
         {},
         ...Object.keys(records[0]).map((name: string) => {
           const array = records.map(
-            (rec: Record<string, unknown>) => rec[name]
+            (rec: Record<string, unknown>) => rec[name],
           );
           const ser = series(array);
           if (ser) return { [name]: ser };
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -95,7 +95,7 @@ export class DataFrame {
           }
         };
         return [name, series()];
-      })
+      }),
     );
     return new DataFrame(columns);
   }
@@ -104,7 +104,7 @@ export class DataFrame {
   public include(names: ColumnNames): DataFrame {
     return new DataFrame(
       Object.assign({}, ...names.map((x) => ({ [x]: this.column(x) }))),
-      this.index
+      this.index,
     );
   }
 
@@ -130,7 +130,7 @@ export class DataFrame {
         const sr = this.column(RowRecordname) as Series;
         const coef: number = correlation(
           sc.values as number[],
-          sr.values as number[]
+          sr.values as number[],
         );
         results.push(coef);
       }
@@ -192,13 +192,13 @@ export class DataFrame {
   /** Select only matching rows */
   public select(callback: RowCallback): DataFrame {
     return this.reindex(
-      this.index.filter((index: number) => callback(this.record(index)))
+      this.index.filter((index: number) => callback(this.record(index))),
     );
   }
 
   /** Rows in reverse order */
   public get reverse(): DataFrame {
-    return this.reindex(this.index.reverse());
+    return this.reindex(this.index.slice().reverse());
   }
 
   /** Slice each column */
@@ -264,7 +264,7 @@ export class DataFrame {
   private record(index: number): RowRecord {
     return Object.assign(
       {},
-      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] }))
+      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] })),
     );
   }
 

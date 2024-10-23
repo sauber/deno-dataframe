@@ -55,40 +55,32 @@ abstract class DataSeries<T> implements SeriesInterface<T> {
 }
 
 /** Series of strings */
-export class TextSeries
-  extends DataSeries<string>
-  implements SeriesInterface<string>
-{
+export class TextSeries extends DataSeries<string>
+  implements SeriesInterface<string> {
   constructor(values?: Array<string>) {
     super(values);
   }
 }
 
 /** Series of booleans */
-export class BoolSeries
-  extends DataSeries<boolean>
-  implements SeriesInterface<boolean>
-{
+export class BoolSeries extends DataSeries<boolean>
+  implements SeriesInterface<boolean> {
   constructor(values?: Array<boolean>) {
     super(values);
   }
 }
 
 /** Series of objects */
-export class ObjectSeries<T>
-  extends DataSeries<T>
-  implements SeriesInterface<T>
-{
+export class ObjectSeries<T> extends DataSeries<T>
+  implements SeriesInterface<T> {
   constructor(values?: Array<T>) {
     super(values);
   }
 }
 
 /** Series of numbers (or undefined values) */
-export class Series
-  extends DataSeries<number | undefined>
-  implements SeriesInterface<number | undefined>
-{
+export class Series extends DataSeries<number | undefined>
+  implements SeriesInterface<number | undefined> {
   override readonly isNumber: boolean = true;
   constructor(values?: Array<number | undefined>) {
     super(values);

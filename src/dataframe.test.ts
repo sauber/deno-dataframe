@@ -27,7 +27,7 @@ Deno.test("Import and export records", () => {
 Deno.test("Explicit define headers", () => {
   const df = DataFrame.fromDef(
     { n: "number", s: "string", b: "bool", o: "object" },
-    testdata
+    testdata,
   );
   assertEquals(df.names, ["n", "s", "b", "o"]);
 });
