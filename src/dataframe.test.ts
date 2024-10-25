@@ -27,7 +27,7 @@ Deno.test("Import and export records", () => {
 Deno.test("Explicit define headers", () => {
   const df = DataFrame.fromDef(
     { n: "number", s: "string", b: "bool", o: "object" },
-    testdata,
+    testdata
   );
   assertEquals(df.names, ["n", "s", "b", "o"]);
 });
@@ -164,6 +164,15 @@ Deno.test("Log", () => {
 
 Deno.test("Addition", () => {
   const df = DataFrame.fromRecords(testdata);
-  const dl = df.add("n", 1);
-  assertEquals(dl.values<number>("n"), [2, 4]);
+  const da = df.add("n", 1);
+  assertEquals(da.values<number>("n"), [2, 4]);
+});
+
+Deno.test("Outlier Detection", () => {
+  const values = [1, 2, 1, 2, 1, 10];
+  const outldata = values.map((x) => ({ n: x }));
+  const df = DataFrame.fromRecords(outldata);
+  const dr = df.outlier(2);
+  assertEquals(df.values("n"), values);
+  assertEquals(dr.values("n"), values.slice(0, -1));
 });

@@ -1,4 +1,4 @@
-import { correlation } from "@sauber/statistics";
+import { avg, correlation, std } from "@sauber/statistics";
 import { Table } from "@sauber/table";
 import { BoolSeries, ObjectSeries, Series, TextSeries } from "./series.ts";
 import type { SeriesClasses, SeriesTypes } from "./series.ts";
@@ -43,7 +43,7 @@ export class DataFrame {
     // Data Series
     private readonly columns: Columns = {},
     // Ordering of rows
-    index?: Index,
+    index?: Index
   ) {
     // Names of columns
     const names: ColumnNames = Object.keys(columns);
@@ -68,12 +68,12 @@ export class DataFrame {
         {},
         ...Object.keys(records[0]).map((name: string) => {
           const array = records.map(
-            (rec: Record<string, unknown>) => rec[name],
+            (rec: Record<string, unknown>) => rec[name]
           );
           const ser = series(array);
           if (ser) return { [name]: ser };
-        }),
-      ),
+        })
+      )
     );
   }
 
@@ -95,7 +95,7 @@ export class DataFrame {
           }
         };
         return [name, series()];
-      }),
+      })
     );
     return new DataFrame(columns);
   }
@@ -104,7 +104,7 @@ export class DataFrame {
   public include(names: ColumnNames): DataFrame {
     return new DataFrame(
       Object.assign({}, ...names.map((x) => ({ [x]: this.column(x) }))),
-      this.index,
+      this.index
     );
   }
 
@@ -130,7 +130,7 @@ export class DataFrame {
         const sr = this.column(RowRecordname) as Series;
         const coef: number = correlation(
           sc.values as number[],
-          sr.values as number[],
+          sr.values as number[]
         );
         results.push(coef);
       }
@@ -192,7 +192,7 @@ export class DataFrame {
   /** Select only matching rows */
   public select(callback: RowCallback): DataFrame {
     return this.reindex(
-      this.index.filter((index: number) => callback(this.record(index))),
+      this.index.filter((index: number) => callback(this.record(index)))
     );
   }
 
@@ -264,7 +264,7 @@ export class DataFrame {
   private record(index: number): RowRecord {
     return Object.assign(
       {},
-      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] })),
+      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] }))
     );
   }
 
@@ -312,5 +312,29 @@ export class DataFrame {
     table.rows = this.grid;
     console.log("\n" + table.toString());
     return this;
+  }
+
+  // Remove records having numbers deviating by more than a factor of standard deviation of column
+  public outlier(factor: number): DataFrame {
+    // Indices of rows having outliers
+    const skip = new Set();
+
+    // Loop each column having numerical values
+    Object.entries(this.columns).forEach(([name, column]) => {
+      if (column.isNumber) {
+        const col = this.values<number>(name);
+        const mean: number = avg(col);
+        const stdv: number = std(col);
+
+        // Loop all rows
+        this.index.forEach((i) => {
+          const val = column.values[i] as number;
+          const outlie = Math.abs(mean - val) / stdv;
+          if (outlie > factor) skip.add(i);
+        });
+      }
+    });
+    const trimmed = this.index.filter((i: number) => !skip.has(i));
+    return this.reindex(trimmed);
   }
 }
