@@ -1,5 +1,6 @@
 import { avg, correlation, std } from "@sauber/statistics";
 import { Table } from "@sauber/table";
+import { shuffleArray } from "@hugoalh/shuffle-array";
 import { BoolSeries, ObjectSeries, Series, TextSeries } from "./series.ts";
 import type { SeriesClasses, SeriesTypes } from "./series.ts";
 
@@ -208,7 +209,7 @@ export class DataFrame {
 
   /** Rows in random order */
   public get shuffle(): DataFrame {
-    return this.reindex(this.index.sort(() => Math.random() - 0.5));
+    return this.reindex(shuffleArray(this.index));
   }
 
   /** Combine with series from other DataFrame */
