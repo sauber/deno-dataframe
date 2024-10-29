@@ -141,7 +141,7 @@ export class DataFrame {
     return new DataFrame(columns);
   }
 
-  /** Generate new number series based existing named series */
+  /** Generate new number series based on existing named series */
   private generate(name: string, callback: (n: number) => number): Series {
     const current = this.columns[name].values as Array<number>;
     const values = this.index.map((i) =>
@@ -173,16 +173,19 @@ export class DataFrame {
       (a[1] || 0) < (b[1] || 0) ? -1 : 1
     );
     const order: Index = sorted.map((a: SortElement) => a[0]);
-    return new DataFrame(this.columns, order);
+    return this.reindex(order);
   }
 
   /** Generate a new column from existing columns */
-  public amend(name: string, callback: RowCallback): DataFrame {
-    const array: SeriesTypes[] = this.index
-      .map((index) => this.record(index))
-      .map((row: RowRecord) => callback(row));
+  public amend<SeriesTypes>(name: string, callback: RowCallback): DataFrame {
+    const array = Array(this.length);
+    for ( const index of this.index) {
+      const row = this.record(index);
+      const value = callback(row);
+      array[index] = value;
+    }
     const ser = series(array);
-    return new DataFrame(Object.assign({}, this.columns, { [name]: ser }));
+    return new DataFrame(Object.assign({}, this.columns, { [name]: ser }), this.index);
   }
 
   /** Rearrange order of rows */

@@ -79,6 +79,7 @@ Deno.test("Correlation Matrix", () => {
 
   // Correlated input to output
   const c: DataFrame = i.correlationMatrix(o);
+  console.log({c});
 
   // Confirm row and column names
   assertEquals(c.column("Keys").values, ["i1", "i2", "i3"]);
