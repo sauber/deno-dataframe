@@ -167,7 +167,7 @@ export class DataFrame {
   /** Sort rows by columns */
   public sort(colname: string): DataFrame {
     const index: Index = this.index;
-    const value: SeriesTypes[] = this.column(colname).values;
+    const value: SeriesTypes[] = this.values(colname);
     const zip: Array<SortElement> = index.map((i: number) => [i, value[i]]);
     const sorted: Array<SortElement> = zip.sort((a, b) =>
       (a[1] || 0) < (b[1] || 0) ? -1 : 1

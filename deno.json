@@ -1,6 +1,6 @@
 {
   "name": "@sauber/dataframe",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "exports": "./mod.ts",
   "imports": {
     "@hugoalh/shuffle-array": "jsr:@hugoalh/shuffle-array@^2.0.5",
