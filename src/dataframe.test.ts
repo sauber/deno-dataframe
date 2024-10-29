@@ -79,11 +79,10 @@ Deno.test("Correlation Matrix", () => {
 
   // Correlated input to output
   const c: DataFrame = i.correlationMatrix(o);
-  console.log({c});
 
   // Confirm row and column names
-  assertEquals(c.column("Keys").values, ["i1", "i2", "i3"]);
-  assertEquals(c.names, ["Keys", "o1", "o2"]);
+  assertEquals(c.column("Name").values, ["i1", "i2", "i3"]);
+  assertEquals(c.names, ["Name", "o1", "o2"]);
 
   // Confirm output in range -1 to +1
   ["o1", "o2"].forEach((name) =>

@@ -122,7 +122,7 @@ export class DataFrame {
     const RowRecords = this.names;
     const cols = other.names;
     const columns: Columns = {
-      Keys: new TextSeries(RowRecords),
+      Name: new TextSeries(RowRecords),
     };
     for (const colname of cols) {
       const results: number[] = [];
