@@ -144,11 +144,10 @@ export class DataFrame {
   /** Generate new number series based on existing named series */
   private generate(name: string, callback: (n: number) => number): Series {
     const current = this.columns[name].values as Array<number>;
-    const values = this.index.map((i) =>
-      current[i] === undefined ? undefined : callback(current[i])
-    );
-    const series = new Series(values);
-    return series;
+    const values = Array<number>(current.length);
+    for (const i in this.index)
+      if (current[i] != undefined) values[i] = callback(current[i]);
+    return new Series(values);
   }
 
   /** Reduce count of significant digits */
@@ -179,13 +178,16 @@ export class DataFrame {
   /** Generate a new column from existing columns */
   public amend<SeriesTypes>(name: string, callback: RowCallback): DataFrame {
     const array = Array(this.length);
-    for ( const index of this.index) {
+    for (const index of this.index) {
       const row = this.record(index);
       const value = callback(row);
       array[index] = value;
     }
     const ser = series(array);
-    return new DataFrame(Object.assign({}, this.columns, { [name]: ser }), this.index);
+    return new DataFrame(
+      Object.assign({}, this.columns, { [name]: ser }),
+      this.index
+    );
   }
 
   /** Rearrange order of rows */
