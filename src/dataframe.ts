@@ -145,7 +145,7 @@ export class DataFrame {
   private generate(name: string, callback: (n: number) => number): Series {
     const current = this.columns[name].values as Array<number>;
     const values = Array<number>(current.length);
-    for (const i in this.index)
+    for (const i of this.index)
       if (current[i] != undefined) values[i] = callback(current[i]);
     return new Series(values);
   }

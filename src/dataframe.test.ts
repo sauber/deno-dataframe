@@ -154,6 +154,9 @@ Deno.test("Digits", () => {
   const df = DataFrame.fromRecords(testdata);
   const dn = df.scale("n", 1 / 7).digits(2);
   assertEquals(dn.values<number>("n"), [0.14, 0.43]);
+
+  const ds = dn.slice(1, 2).digits(2);
+  assertEquals(ds.values<number>("n"), [0.43]);
 });
 
 Deno.test("Log", () => {
