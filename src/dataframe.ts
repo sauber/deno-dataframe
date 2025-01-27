@@ -44,7 +44,7 @@ export class DataFrame {
     // Data Series
     private readonly columns: Columns = {},
     // Ordering of rows
-    index?: Index
+    index?: Index,
   ) {
     // Names of columns
     const names: ColumnNames = Object.keys(columns);
@@ -69,12 +69,12 @@ export class DataFrame {
         {},
         ...Object.keys(records[0]).map((name: string) => {
           const array = records.map(
-            (rec: Record<string, unknown>) => rec[name]
+            (rec: Record<string, unknown>) => rec[name],
           );
           const ser = series(array);
           if (ser) return { [name]: ser };
-        })
-      )
+        }),
+      ),
     );
   }
 
@@ -96,7 +96,7 @@ export class DataFrame {
           }
         };
         return [name, series()];
-      })
+      }),
     );
     return new DataFrame(columns);
   }
@@ -105,7 +105,7 @@ export class DataFrame {
   public include(names: ColumnNames): DataFrame {
     return new DataFrame(
       Object.assign({}, ...names.map((x) => ({ [x]: this.column(x) }))),
-      this.index
+      this.index,
     );
   }
 
@@ -131,7 +131,7 @@ export class DataFrame {
         const sr = this.column(RowRecordname) as Series;
         const coef: number = correlation(
           sc.values as number[],
-          sr.values as number[]
+          sr.values as number[],
         );
         results.push(coef);
       }
@@ -145,8 +145,9 @@ export class DataFrame {
   private generate(name: string, callback: (n: number) => number): Series {
     const current = this.columns[name].values as Array<number>;
     const values = Array<number>(current.length);
-    for (const i of this.index)
+    for (const i of this.index) {
       if (current[i] != undefined) values[i] = callback(current[i]);
+    }
     return new Series(values);
   }
 
@@ -186,7 +187,7 @@ export class DataFrame {
     const ser = series(array);
     return new DataFrame(
       Object.assign({}, this.columns, { [name]: ser }),
-      this.index
+      this.index,
     );
   }
 
@@ -198,7 +199,7 @@ export class DataFrame {
   /** Select only matching rows */
   public select(callback: RowCallback): DataFrame {
     return this.reindex(
-      this.index.filter((index: number) => callback(this.record(index)))
+      this.index.filter((index: number) => callback(this.record(index))),
     );
   }
 
@@ -270,7 +271,7 @@ export class DataFrame {
   private record(index: number): RowRecord {
     return Object.assign(
       {},
-      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] }))
+      ...this.names.map((x) => ({ [x]: this.columns[x].values[index] })),
     );
   }
 
@@ -320,7 +321,7 @@ export class DataFrame {
     return this;
   }
 
-  // Remove records having numbers deviating by more than a factor of standard deviation of column
+  /** Remove records having numbers deviating by more than a factor of standard deviation of column */
   public outlier(factor: number): DataFrame {
     // Indices of rows having outliers
     const skip = new Set();
@@ -342,5 +343,42 @@ export class DataFrame {
     });
     const trimmed = this.index.filter((i: number) => !skip.has(i));
     return this.reindex(trimmed);
+  }
+
+  /** Left join columns on matching string values */
+  public leftJoin(other: DataFrame, name: string): DataFrame {
+    // Names of columns to be inserted
+    const names = other.names.filter((n) => n !== name);
+
+    // Source and target columns of keys
+    const source: string[] = other.column(name).values as string[];
+    const target: string[] = this.column(name).values as string[];
+
+    // Keys to be matched
+    const keys: string[] = other.values<string>(name);
+
+    // Generate lookup of source and target row number for each key
+    const rowmap: Array<[number, number]> = [];
+    keys.forEach((key: string) => {
+      const targetRow: number = target.indexOf(key);
+      if (targetRow > -1) {
+        const sourceRow: number = source.indexOf(key);
+        rowmap.push([sourceRow, targetRow]);
+      }
+    });
+
+    // Copy values from other dataframe to new columns in this dataframe
+    const columns: Columns = {};
+    names.forEach((n) => {
+      const values: SeriesTypes[] = [];
+      const sourceColumn = other.column(n).values;
+      rowmap.forEach(([sourceRow, targetRow]) => {
+        values[targetRow] = sourceColumn[sourceRow];
+      });
+      columns[n] = series(values);
+    });
+
+    // Return new dataframe with additional columns
+    return this.join(new DataFrame(columns));
   }
 }

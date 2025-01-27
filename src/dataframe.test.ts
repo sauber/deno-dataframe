@@ -27,7 +27,7 @@ Deno.test("Import and export records", () => {
 Deno.test("Explicit define headers", () => {
   const df = DataFrame.fromDef(
     { n: "number", s: "string", b: "bool", o: "object" },
-    testdata
+    testdata,
   );
   assertEquals(df.names, ["n", "s", "b", "o"]);
 });
@@ -178,4 +178,12 @@ Deno.test("Outlier Detection", () => {
   const dr = df.outlier(2);
   assertEquals(df.values("n"), values);
   assertEquals(dr.values("n"), values.slice(0, -1));
+});
+
+Deno.test("Left Join", () => {
+  const df = DataFrame.fromRecords(testdata);
+  const dg = DataFrame.fromRecords([{ s: "b", p: 4 }, { s: "a", p: 5 }]);
+  const dj = df.leftJoin(dg, "s");
+  assertEquals(dj.values<number>("p"), [5, 4]);
+  assertEquals(dj.names, ["n", "s", "b", "o", "p"]);
 });

@@ -102,6 +102,19 @@ const other: DataFrame = new DataFrame.fromRecords([
 const extended: DataFrame = dataframe.join(other);
 ```
 
+Combine two dataframes on matching keys
+
+```typescript
+const other: DataFrame = new DataFrame.fromRecords([
+  { o: 3, s: "b" },
+  { o: 4, s: "a" },
+]);
+
+// Result has columns "n", "s", "b" and "o" 
+const extended: DataFrame = dataframe.join(other, "s");
+```
+
+
 Rename columns:
 
 ```typescript
@@ -116,7 +129,7 @@ Scale values in column to make sum equal to one:
 const distributed: DataFrame = dataframe.distribute("n");
 ```
 
-Take log2 of each value in column:
+Take log of each value in column:
 
 ```typescript
 // Column "n" will have values 0 and 0.6931471805599453
