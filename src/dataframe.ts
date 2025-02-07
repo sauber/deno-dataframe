@@ -24,7 +24,7 @@ type Header = Record<ColumnName, ColumnTypeName>;
 
 /** Auto-generate a series from an array of unknown values */
 function series(array: Array<unknown>): SeriesClasses {
-  switch (typeof array[0]) {
+  switch (typeof array.filter((v) => v != undefined)[0]) {
     case "number":
       return new Series(array as number[]);
     case "string":
