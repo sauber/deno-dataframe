@@ -187,3 +187,10 @@ Deno.test("Left Join", () => {
   assertEquals(dj.values<number>("p"), [5, 4]);
   assertEquals(dj.names, ["n", "s", "b", "o", "p"]);
 });
+
+Deno.test("Create from different type of records", () => {
+  const data = [{ n: 1 }, { bar: "foo" }];
+  const df = DataFrame.fromRecords(data);
+  assertEquals(df.values<number>("n"), [1, undefined]);
+  assertEquals(df.values<string>("bar"), [undefined, "foo"]);
+});

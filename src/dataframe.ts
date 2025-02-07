@@ -64,18 +64,26 @@ export class DataFrame {
 
   /** Import data from list of records, autodetect types from first record */
   public static fromRecords(records: RowRecords): DataFrame {
-    return new DataFrame(
-      Object.assign(
-        {},
-        ...Object.keys(records[0]).map((name: string) => {
-          const array = records.map(
-            (rec: Record<string, unknown>) => rec[name],
-          );
-          const ser = series(array);
-          if (ser) return { [name]: ser };
-        }),
-      ),
+    // Transpose records to columns
+    const arrays: Record<string, Array<unknown>> = {};
+    records.forEach((rec: Record<string, unknown>, index: number) =>
+      Object.entries(rec).forEach(([key, value]) => {
+        if (!(key in arrays)) {
+          arrays[key] = new Array(records.length).with(index, value);
+        } else arrays[key][index] = value;
+      })
     );
+
+    // Identify types of columns
+    const columns: Columns = Object.assign(
+      {},
+      ...Object.entries(arrays).map(([key, array]) => ({
+        [key]: series(array),
+      })),
+    );
+
+    // Compile DataFrame
+    return new DataFrame(columns);
   }
 
   /** Generate a DataFrame from a header definition and optional data.  */
