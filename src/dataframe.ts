@@ -174,6 +174,8 @@ export class DataFrame {
 
   /** Sort rows by columns */
   public sort(colname: string, ascending: boolean = true): DataFrame {
+    // Confirm column exist
+    if ( ! this.names.includes(colname) ) return this;
     const index: Index = this.index;
     const value: SeriesTypes[] = this.column(colname).values;
     const zip: Array<SortElement> = index.map((i: number) => [i, value[i]]);
